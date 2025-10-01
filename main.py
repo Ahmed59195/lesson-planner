@@ -1,0 +1,48 @@
+import streamlit as st
+import google.generativeai as genai
+
+# ✅ Gemini API configure کریں
+genai.configure(api_key="AIzaSyChagGeOpY2R6wuA68DSMkvQM1aCygFEUQ")
+model = genai.GenerativeModel("gemini-2.0-flash")
+
+st.set_page_config(page_title="📘 Urdu Lesson Planner", layout="centered")
+
+st.title("📘 اردو Lesson Planner")
+st.write("یہ ایپ آپ کے دیے گئے موضوع اور کلاس کے مطابق اردو میں Lesson Plan تیار کرے گی۔")
+
+# User Inputs
+topic = st.text_input("سبق کا موضوع درج کریں:")
+class_level = st.text_input("کلاس درج کریں (مثلاً: کلاس 3):")
+
+lesson_plan = None
+
+if st.button("Lesson Plan تیار کریں"):
+    if topic.strip() and class_level.strip():
+        prompt = f"""
+        آپ ایک پرائمری اسکول کے استاد ہیں۔
+        آپ کو {class_level} کے لیے سبق کا موضوع دیا گیا ہے: {topic}
+        براہ کرم اردو میں ایک مکمل Lesson Plan تیار کریں۔
+
+        Lesson Plan میں یہ شامل ہوں:
+        - سبق کا عنوان
+        - کلاس لیول
+        - سبق کے مقاصد
+        - تدریسی طریقے
+        - سرگرمیاں (طلبہ کے لیے)
+        - سوالات و جوابات
+        - ہوم ورک
+        """
+        response = model.generate_content(prompt)
+        lesson_plan = response.text
+    else:
+        st.warning("براہ کرم Topic اور Class دونوں درج کریں۔")
+
+# Show Lesson Plan
+if lesson_plan:
+    st.subheader("📖 تیار شدہ Lesson Plan")
+    st.write(lesson_plan)
+
+    # Option to download
+    st.download_button("⬇️ Lesson Plan Download کریں",
+                       lesson_plan,
+                       file_name="lesson_plan.txt")
