@@ -1,22 +1,23 @@
 import streamlit as st
 import google.generativeai as genai
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
-# ✅ Load .env file
+# ✅ Try to load API key from .env (for local use)
 load_dotenv()
-
-# ✅ Get API Key from .env
 api_key = os.getenv("GEMINI_API_KEY")
+
+# ✅ If not found, try Streamlit Cloud Secrets
+if not api_key and "GEMINI_API_KEY" in st.secrets:
+    api_key = st.secrets["GEMINI_API_KEY"]
+
 if not api_key:
-    st.error("❌ Gemini API Key not found. Please set it in .env file.")
+    st.error("❌ Gemini API Key not found. Please set it in .env (local) or Streamlit Secrets (cloud).")
 else:
     genai.configure(api_key=api_key)
-
     model = genai.GenerativeModel("gemini-2.0-flash")
 
     st.set_page_config(page_title="📘 Urdu Lesson Planner", layout="centered")
-
     st.title("📘 اردو Lesson Planner")
     st.write("یہ ایپ آپ کے دیے گئے موضوع اور کلاس کے مطابق اردو میں Lesson Plan تیار کرے گی۔")
 
@@ -52,7 +53,6 @@ else:
         st.subheader("📖 تیار شدہ Lesson Plan")
         st.write(lesson_plan)
 
-        # Option to download
         st.download_button("⬇️ Lesson Plan Download کریں",
                            lesson_plan,
                            file_name="lesson_plan.txt")
